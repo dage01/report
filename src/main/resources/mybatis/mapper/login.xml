@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dage.suju.DAO.UserDao">
+
+    <select id="mod_list" resultType="com.dage.suju.DTO.ListDto">
+        Select
+        a.YYYY,
+        a.SEQ,
+        TO_CHAR(A.MODDATE,'YYYY-MM-DD') MODDATE,
+        TO_CHAR(A.CRTDATE,'YYYY-MM-DD') CRTDATE,
+        SF_PROJ_NAME(GET_DEPT_MAP2021(B.PROJ_CODE,'A')) AS PROJ_NAME,
+        H.NAME ACT_STATE_NAME,
+        A.PROJ_ACT_NAME,
+        A.ORDER_NAME,
+        E.NAME REGION_NAME,
+        A.WORK_NAME,
+        A.CONTRACTOR_NAME,
+        D.NAME EXPECT_GM_NAME,
+        L.NAME PROG_LVL_NAME,
+        CASE WHEN NVL(C.SUJU_STATE,A.SUJU_STATE) = '1'
+        THEN '높음'
+        WHEN NVL(C.SUJU_STATE,A.SUJU_STATE) = '2'
+        THEN '보통'
+        WHEN NVL(C.SUJU_STATE,A.SUJU_STATE) = '3'
+        THEN '낮음'
+        END
+        AS SUJU_STATE_NAME,
+        A.CONT_USER_NAME || ' / ' || A.PHONE CONT_USER_NAME,
+        A.PHONE,
+        G.NAME BID_TYPE_NAME,
+        F.NAME BID_TAG_NAME,
+        REPLACE(REPLACE(A.REMARKS, CHR(13), ''), CHR(10), '&lt;br&gt;') REMARKS,
+        '활동내역&lt;br&gt;' || '(' || TO_CHAR(A.MODDATE,'YYYY-MM-DD') ||')&lt;br&gt;' || '(' || L.NAME || ')' ACT_CONT_NAME,
+        A.PROJ_OUTLINE1,
+        A.PROJ_OUTLINE2,
+        A.COMPETITOR,
+        A.ACT_STRATEGY,
+        A.DEPT_REQUEST
+
+        From
+        TCP_CONT_ACT a,
+        TCC_PROJ_CODE b
+        , (
+        SELECT Z.YYYY, Z.SEQ, Z.ACT_DT, Z.SUJU_STATE, Z.PROG_LVL, Z.BID_EX_DT
+        ,(CASE
+        WHEN Z.PROG_LVL &lt; 7 THEN 1
+        WHEN Z.PROG_LVL = 10 THEN 6
+        WHEN Z.PROG_LVL = 11 THEN 5
+        ELSE Z.PROG_LVL-5 END
+        ) AS ACT_STATE
+        FROM
+        (
+        SELECT
+        X.YYYY, X.SEQ, X.ACT_SEQ, X.ACT_DT, X.SUJU_STATE, X.PROG_LVL, X.BID_EX_DT
+        , ROW_NUMBER()OVER(PARTITION BY X.YYYY,X.SEQ ORDER BY X.ACT_SEQ DESC) RNUM
+        FROM TCP_CONT_ACT_DET X
+        ) Z WHERE Z.RNUM = 1
+
+        ) C
+        , ( SELECT CODE_LIST_ID CODE, CODE_LIST_NAME NAME
+        FROM TCC_CODE_LIST
+        WHERE CODE_GROUP_NO = '22581' AND USE_TAG = 'T'
+        ) D
+        , (
+        select '1' CODE,'국내' NAME
+        from dual
+        union all
+        select '2' CODE ,'싱가폴' NAME
+        from dual
+        union all
+        select '3' CODE ,'홍콩' NAME
+        from dual
+        union all
+        select '4' CODE ,'필리핀' NAME
+        from dual
+        union all
+        select '5' CODE ,'기타' NAME
+        from dual
+        union all
+        select CODE , NAME
+        from
+        (select
+        code_list_id as CODE , max(code_list_name) as NAME
+        from TCC_CODE_LIST
+        where CODE_GROUP_NO = '22501'
+        and code_list_id in ('SB','VN','SA','PA','KH','BD','IQ','MY','PE')
+        group by code_list_id) s
+        ) E
+        , ( SELECT CODE_LIST_ID CODE, CODE_LIST_NAME NAME
+        FROM TCC_CODE_LIST
+        WHERE CODE_GROUP_NO = 10521
+        AND CODE_LIST_ID != '5'
+        AND USE_TAG = 'T'
+        ) F
+        , ( SELECT CODE_LIST_ID CODE, CODE_LIST_NAME NAME
+        FROM TCC_CODE_LIST
+        WHERE CODE_GROUP_NO = 22582
+        AND USE_TAG = 'T'
+        ) G
+        , ( select '0' CODE, '대기' NAME from dual
+        union all SELECT CODE_LIST_ID CODE, CODE_LIST_NAME NAME
+        FROM TCC_CODE_LIST
+        WHERE CODE_GROUP_NO = 11020
+        AND USE_TAG = 'T'
+        ) H
+        , (Select   A.CODE_LIST_ID CODE
+                    , A.CODE_LIST_NAME AS NAME
+        From   TCC_CODE_LIST A
+        Where  A.CODE_GROUP_NO = 22620
+        And    USE_TAG = 'T'
+        ) L
+
+        Where 1=1
+        AND A.YYYY = C.YYYY
+        AND A.SEQ = C.SEQ
+        AND decode(a.DEPT_CODE,'7030','2031','7020','2021','7012','2012','1190','2011','7010','2011','4221','4220',a.DEPT_CODE) = b.PROJ_CODE(+)
+        AND A.EXPECT_GM = D.CODE(+)
+        AND A.REGION_TYPE = E.CODE
+        AND A.BID_TAG = F.CODE(+)
+        AND A.BID_TYPE = G.CODE(+)
+        AND nvl(C.ACT_STATE,A.ACT_STATE) = H.CODE
+        And a.SEQ = #{seq}
+        AND ROWNUM = 1
+        order by a.SUJU_STATE asc, a.CONT_DT desc
+    </select>
+
+    <select id="mod_list_dt" resultType="com.dage.suju.DTO.ListDto">
+        Select
+        NVL(BID_EX_DT,'') BID_EX_DT,
+        REPLACE(REPLACE(ACT_CONT, CHR(13), ''), CHR(10), '&lt;br&gt;') ACT_CONT
+        FROM TCP_CONT_ACT_DET
+        WHERE SEQ = #{seq}
+        AND ROWNUM = 1
+        order by yyyy desc
+    </select>
+
+
+
+
+    <select id="file_list" resultType="com.dage.suju.DTO.ListDto">
+        SELECT
+        SEQ FILE_SEQ_DT,
+        KEY_VAL1 YYYY,
+        KEY_VAL2 FILE_SEQ,
+        DOC_IMG_URL ORIGIN_NM,
+        'http://derp.dage.co.kr/DAGE/upload_file/common' || DOC_IMG_URL PATH,
+        SUBSTR(DOC_IMG_URL, INSTR(DOC_IMG_URL, '/', 1, 3) + 1) AS REAL_FILE_NAME
+        FROM TCC_DOC_IMG_LIST
+        where MASTER_TABEL_NM = 'TCP_CONT_ACT'
+        AND KEY_VAL2 = #{seq}
+        order by seq desc
+    </select>
+    <select id="getFileInfo" resultType="com.dage.suju.DTO.ListDto">
+        SELECT
+        SEQ FILE_SEQ_DT,
+        DOC_IMG_URL ORIGIN_NM,
+        'http://derp.dage.co.kr/DAGE/upload_file/common' PATH,
+        SUBSTR(DOC_IMG_URL, INSTR(DOC_IMG_URL, '/', 1, 3) + 1) AS REAL_FILE_NAME,
+        SUBSTR(DOC_IMG_URL,1,INSTR(DOC_IMG_URL, '/', 1, 3)) AS MIDDLE_PATH
+        FROM TCC_DOC_IMG_LIST
+        where MASTER_TABEL_NM = 'TCP_CONT_ACT'
+        AND seq = #{seq}
+        order by seq desc
+    </select>
+
+
+
+
+</mapper>

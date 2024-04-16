@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head th:replace="fragments/head :: headFragment">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"></script>
+</head>
+
+
+
+
+
+
+
+
+
+<style>
+
+
+        body{
+
+        float : center;
+        }
+
+        #title {
+        margin-left: 10px;
+        }
+
+        .tb1 td{
+          width: 100%;
+          border: 1px solid #444444;
+          font-size: 14px;
+          color: black;
+        }
+
+        .file_text:hover{
+            cursor:pointer;
+            color:skyblue;
+            text-decoration: underline;
+        }
+
+
+    </style>
+
+
+<body>
+<div class="col-12" style="margin: 0px 0px 0px 0px; text-align:center; height:60px;">
+  <div style="height:15px;"></div>
+  <h2 class="mb-3 fw-bold">수주영업활동 보고서</h2>
+
+</div>
+<input id="yyyy" type="text" class="form-control" th:value="${info?.yyyy}" readonly hidden/>
+<input id="seq" type="text" class="form-control" th:value="${info?.seq}" readonly hidden/>
+
+
+<div style="text-align:right; margin:0px 10px 0px 0px;">
+</div>
+<div class="main_div  container-fluid" id="main_div" style="width:100%;">
+    <div class="col-12" style="margin-top:20px;">
+
+
+
+      <table class="tb1" style="width:100%;">
+
+        <tbody>
+          <tr>
+            <td style="width:5%; height:30px; text-align:center; border:none;"></td>
+            <td style="width:5%; height:30px; text-align:center; border:none;"></td>
+            <td style="width:15%; height:30px; text-align:center; border:none;"></td>
+            <td style="width:3%;  height:30px; text-align:center; border:none;"></td>
+            <td style="width:8%; height:30px; text-align:center; border:none;"></td>
+            <td style="width:8%; height:30px; text-align:center; border:none;"></td>
+            <td style="width:5%; height:30px; text-align:center; border:none;"></td>
+            <td style="width:2%; height:30px; text-align:center; border:none;"></td>
+            <td style="width:5%; height:30px; text-align:center;" bgcolor="#d3d3d3" color="black"><strong>최종 작성일</strong></td>
+            <td style="width:12%; height:30px; text-align:center;" th:text="${info?.moddate}"></td>
+          </tr>
+          <tr>
+            <td colspan="2" style="width:5%; height:30px; text-align:center;" bgcolor="#d3d3d3"><strong>발생년도(최초등록일)</strong></td>
+            <td style="width:3%; height:30px; text-align:center;" th:text="${info?.crtdate}"></td>
+            <td style="width:12%; height:30px; text-align:center;" bgcolor="#d3d3d3"><strong>담당부서<br>/담당임원</strong></td>
+            <td style="width:1%;  height:30px; text-align:center;" th:text="${info?.proj_name}" colspan="4"></td>
+            <td style="width:8%; height:30px; text-align:center;" bgcolor="#d3d3d3"><strong>수주상태</strong></td>
+            <td style="width:8%; height:30px; text-align:center;" th:text="${info?.act_state_name}"></td>
+          </tr>
+        <tr height="30px"></tr>
+          <tr>
+            <td rowspan="3" style="width:4.8%;   text-align:center;" bgcolor="#d3d3d3"><strong>P/J</strong></td>
+            <td style="width:10%; height:30px;    text-align:center;" bgcolor="#d3d3d3"><strong>프로젝트명</strong></td>
+            <td style="width:20%; height:30px; text-align:center;" th:text="${info?.proj_act_name}"></td>
+            <td style="width:3%; height:30px;  text-align:center;" bgcolor="#d3d3d3"><strong>발주처</strong></td>
+            <td style="width:20%; height:30px; text-align:center;" th:text="${info?.order_name}" colspan="4"></td>
+            <td style="width:10%; height:30px;  text-align:center;" bgcolor="#d3d3d3"><strong>지역</strong></td>
+            <td style="width:20%; height:30px; text-align:center;" th:text="${info?.region_name}"></td>
+          </tr>
+          <tr>
+            <td style="width:3%; height:30px;  text-align:center;" bgcolor="#d3d3d3"><strong>주요공종</strong></td>
+            <td style="width:10%; height:30px; text-align:center;" th:text="${info?.work_name}"></td>
+            <td style="width:4%; height:30px;  text-align:center;" bgcolor="#d3d3d3"><strong>원도급사</strong></td>
+            <td style="width:10%; height:30px; text-align:center;" th:text="${info?.contractor_name}" colspan="4"></td>
+            <td style="width:4%; height:30px;  text-align:center;" bgcolor="#d3d3d3"><strong>예상규모</strong></td>
+            <td style="width:20%; height:30px; text-align:center;" th:text="${info?.expect_gm_name}"></td>
+          </tr>
+          <tr>
+            <td style="width:3%; height:180px;  text-align:center;" bgcolor="#d3d3d3"><strong>공사개요(1)</strong></td>
+            <td style="width:20%; height:60px; text-align:center;" th:utext="${info?.proj_outline1}" colspan="2"></td>
+            <td style="width:4%; height:30px;  text-align:center;" bgcolor="#d3d3d3"><strong>공사개요(2)</strong></td>
+            <td style="width:20%; height:60px; text-align:center;" th:utext="${info?.proj_outline2}" colspan="5"></td>
+
+          </tr>
+          <tr height="30px"></tr>
+
+          <tr>
+            <td rowspan="4" style="width:4.5%; text-align:center;" bgcolor="#d3d3d3"><strong>입찰</strong></td>
+            <td style="width:7.2%; height:30px; text-align:center;" bgcolor="#d3d3d3"><strong>진행단계</strong></td>
+            <td style="width:23.4%; height:30px; text-align:center;" th:text="${info?.prog_lvl_name}"></td>
+            <td style="width:2%; height:30px; text-align:center;" bgcolor="#d3d3d3"><strong>수주가능성</strong></td>
+            <td style="width:23.4%; height:30px; text-align:center;" th:text="${info?.suju_state_name}" colspan="4"></td>
+
+            <td style="width:9.4%; height:30px; text-align:center;" bgcolor="#d3d3d3" colspan="2"><strong>Contact Person</strong></td>
+
+          </tr>
+          <tr>
+            <td style="width:3%; height:30px; text-align:center;" bgcolor="#d3d3d3"><strong>참여형태</strong></td>
+            <td style="width:10%; height:30px; text-align:center;" th:text="${info?.bid_type_name}"></td>
+            <td style="width:4%; height:30px; text-align:center;" bgcolor="#d3d3d3"><strong>입찰방식</strong></td>
+            <td style="width:10%; height:30px; text-align:center;" th:text="${info?.bid_tag_name}"></td>
+            <td style="width:8%; height:30px; text-align:center;" bgcolor="#d3d3d3"><strong>입찰예정월</strong></td>
+            <td style="width:10%; height:30px; text-align:center;" colspan="2" th:text="${info_dt?.bid_ex_dt}"></td>
+
+            <td style="width:10%; height:30px; text-align:center;" th:text="${info?.cont_user_name}" colspan="2" rowspan="3"></td>
+          </tr>
+          <tr>
+            <td style="width:4%; height:30px; text-align:center;" bgcolor="#d3d3d3"><strong>경쟁사</strong></td>
+            <td colspan="6" style="width:10%; height:30px; text-align:center;" th:text="${info?.competitor}"></td>
+          </tr>
+          <tr>
+            <td style="width:3%; height:60px; text-align:center;" bgcolor="#d3d3d3"><strong>특기사항</strong></td>
+            <td style="width:10%; height:60px; text-align:center; padding: 0px 0px 0px 10px;" colspan="6" th:utext="${info?.remarks}"></td>
+          </tr>
+
+          <tr height="30px"></tr>
+
+          <tr>
+            <td rowspan="2" style="width:4.65%; text-align:center;" bgcolor="#d3d3d3"><strong>진행사항</strong></td>
+            <td style="width:7%; height:180px; text-align:center; font-weight:bold;"  rowspan="2" bgcolor="#d3d3d3" th:utext="${info?.act_cont_name}"></td>
+            <td style="width:10%; height:60px; padding: 10px 0px 10px 10px;" colspan="2" rowspan="2" th:utext="${info_dt?.act_cont}"></td>
+            <td style="width:10%; height:30px; text-align:center;" bgcolor="#d3d3d3"><strong>수주전략</strong></td>
+            <td style="width:10%; height:30px; text-align:center;" colspan="5" th:text="${info?.act_strategy}"></td>
+          </tr>
+
+          <tr>
+            <td style="width:7%; height:30px; text-align:center;" bgcolor="#d3d3d3"><strong>타 부서 요청</strong></td>
+            <td style="width:10%; height:30px; text-align:center;" colspan="5" th:text="${info?.dept_request}"></td>
+          </tr>
+
+          <tr height="30px"></tr>
+          <td style="width:4.65%; height:30px; text-align:center;" bgcolor="#d3d3d3"><strong>첨부파일</strong></td>
+          <tr th:each="file : ${file}">
+
+             <td colspan="2" style="border:none;">
+               <a class="file_text" th:text="${file?.real_file_name}" th:id="${file?.file_seq_dt}"
+                  download></a>
+             </td>
+             <td colspan="8" style="border:none;" id="file_1"></td>
+          </tr>
+
+
+        </tbody>
+      </table>
+
+
+
+    </div>
+  </div>
+
+
+
+<script>
+$(function(){
+
+
+})
+
+   $(".file_text").on("click",function(){
+
+      var seq =  $(this).attr("id");
+
+
+
+       $.ajax({
+
+            url:"/file_download",
+            data:{"seq" :seq},
+             xhrFields: {
+                 responseType: "blob",
+             }
+             ,contentType: "application/x-www-form-urlencoded; charset=UTF-8"
+             }).done(function (blob, status, xhr) {
+                window.location.href = '/file_download'+'?seq='+seq;
+             }).fail(function(data, textStatus, errorThrown){
+                alert("파일을 찾을 수 없습니다.");
+             });
+       })
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
